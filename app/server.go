@@ -7,13 +7,13 @@ import (
 )
 
 func main() {
+	// listen
+	l, err := net.Listen("tcp", "0.0.0.0:4221")
+	if err != nil {
+		fmt.Println("Failed to bind to port 4221")
+		os.Exit(1)
+	}
 	for {
-		// listen
-		l, err := net.Listen("tcp", "0.0.0.0:4221")
-		if err != nil {
-			fmt.Println("Failed to bind to port 4221")
-			os.Exit(1)
-		}
 		// conn from listener
 		conn, err := l.Accept()
 		if err != nil {
@@ -22,9 +22,13 @@ func main() {
 		}
 		defer conn.Close()
 
-		request := make([]byte, 0)
-		conn.Read(request)
-		fmt.Println(request)
+		requestBuf := make([]byte, 1024)
+		n, err := conn.Read(requestBuf)
+		if err != nil {
+			fmt.Println("Error reading connection: ", err.Error())
+		}
+		request := requestBuf[:n]
+		fmt.Printf("%s", request)
 		// send response over conn.
 		response := []byte("HTTP/1.1 200 OK\r\n\r\n")
 		_, err = conn.Write(response)
