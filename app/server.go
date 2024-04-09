@@ -30,14 +30,18 @@ func main() {
 		}
 		request := string(requestBuf[:n])
 		fmt.Printf(request)
-		lines := strings.Split(request, "\n")
+		lines := strings.Split(request, "\r\n")
 		startLine := strings.Split(lines[0], " ")
-		fmt.Println(startLine[1])
+		// fmt.Println(startLine[1])
 		var response []byte
 		if strings.Compare(startLine[1], "/") == 0 {
 			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 		} else {
-			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+			fmt.Println(startLine[1])
+			body := []byte(startLine[1][1:])
+			fmt.Println(body)
+			header := []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\n\r\n")
+			response = append(header, body...)
 		}
 		// send response over conn.
 		_, err = conn.Write(response)
