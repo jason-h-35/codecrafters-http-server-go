@@ -36,12 +36,14 @@ func main() {
 		var response []byte
 		if strings.Compare(startLine[1], "/") == 0 {
 			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
-		} else {
+		} else if strings.HasPrefix(startLine[1], "/echo/") {
 			fmt.Println(startLine[1])
-			body := []byte(startLine[1][1:])
-			fmt.Println(body)
-			header := []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\n\r\n")
+			body := []byte(startLine[1][6:])
+			headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
+			header := []byte(headerString)
 			response = append(header, body...)
+		} else {
+			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 		}
 		// send response over conn.
 		_, err = conn.Write(response)
