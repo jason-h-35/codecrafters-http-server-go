@@ -20,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
-	// send response over conn
+	// send response over conn.
 	response := []byte("HTTP/1.1 200 OK\r\n\r\n")
 	_, err = conn.Write(response)
 	if err != nil {
