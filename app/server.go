@@ -32,13 +32,17 @@ func main() {
 		fmt.Printf(request)
 		lines := strings.Split(request, "\r\n")
 		startLine := strings.Split(lines[0], " ")
-		// fmt.Println(startLine[1])
 		var response []byte
 		if strings.Compare(startLine[1], "/") == 0 {
 			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 		} else if strings.HasPrefix(startLine[1], "/echo/") {
-			fmt.Println(startLine[1])
 			body := []byte(startLine[1][6:])
+			headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
+			header := []byte(headerString)
+			response = append(header, body...)
+		} else if strings.Compare(startLine[1], "/user-agent") == 0 {
+			userAgent := strings.Split(lines[2], " ")[1]
+			body := []byte(userAgent)
 			headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 			header := []byte(headerString)
 			response = append(header, body...)
