@@ -9,6 +9,34 @@ import (
 
 const ListenAddress = "0.0.0.0:4221"
 
+type HTTPRequest struct {
+	method    string
+	resource  string
+	version   string
+	host      string
+	userAgent string
+	accept    string
+	bytes     []byte
+}
+
+func NewHTTPRequest(buf []byte) HTTPRequest {
+	s := string(buf)
+	lines := strings.Split(s, "\r\n")
+	tokens := make([][]string, len(lines))
+	for i := range lines {
+		tokens[i] = strings.Split(lines[i], " ")
+	}
+	return HTTPRequest{
+		method:    tokens[0][0],
+		resource:  tokens[0][1],
+		version:   tokens[0][2],
+		host:      tokens[1][1],
+		userAgent: tokens[2][1],
+		accept:    tokens[3][1],
+		bytes:     buf,
+	}
+}
+
 func handleRequest(requestBuf []byte) []byte {
 	request := string(requestBuf)
 	fmt.Printf(request)
@@ -42,6 +70,7 @@ func handleConnection(conn net.Conn) {
 	if err != nil {
 		fmt.Println("Error reading connection: ", err.Error())
 	}
+
 	response := handleRequest(request[:n])
 	// send response over conn.
 	_, err = conn.Write(response)
