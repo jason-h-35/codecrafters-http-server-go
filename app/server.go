@@ -62,10 +62,25 @@ func handleRequest(requestBuf []byte) []byte {
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
+	} else if strings.HasPrefix(request.resource, "/files/") {
+		tokens := strings.Split(request.resource, "/")[2:]
+		subpath := strings.Join(tokens, "/")
+		body := []byte(fileToResponse(subpath))
+		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n", len(body))
+		header := []byte(headerString)
+		response = append(header, body...)
 	} else {
 		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 	}
 	return response
+}
+
+func fileToResponse(path string) []byte {
+	dat, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return dat
 }
 
 func handleConnection(conn net.Conn) {
