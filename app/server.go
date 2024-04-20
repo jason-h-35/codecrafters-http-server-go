@@ -15,28 +15,36 @@ type HTTPRequest struct {
 	version   string
 	host      string
 	userAgent string
-	accept    string
+	acceptEnc string
 }
 
 func NewHTTPRequest(buf []byte) HTTPRequest {
 	s := string(buf)
 	lines := strings.Split(s, "\r\n")
-	tokens := make([][]string, len(lines))
-	for i := range lines {
-		tokens[i] = strings.Split(lines[i], " ")
+	methodLine := strings.Split(lines[0], " ")
+	var host, userAgent, acceptEnc string
+	for _, l := range lines[1:] {
+		if strings.HasPrefix(l, "Host:") {
+			host = strings.Split(l, " ")[1]
+		}
+		if strings.HasPrefix(l, "User-Agent:") {
+			userAgent = strings.Split(l, " ")[1]
+		}
+		if strings.HasPrefix(l, "Accept-Encoding:") {
+			acceptEnc = strings.Split(l, " ")[1]
+		}
 	}
 	return HTTPRequest{
-		method:    tokens[0][0],
-		resource:  tokens[0][1],
-		version:   tokens[0][2],
-		host:      tokens[1][1],
-		userAgent: tokens[2][1],
-		accept:    tokens[3][1],
+		method:    methodLine[0],
+		resource:  methodLine[1],
+		version:   methodLine[2],
+		host:      host,
+		userAgent: userAgent,
+		acceptEnc: acceptEnc,
 	}
 }
 
 func handleRequest(requestBuf []byte) []byte {
-
 	request := NewHTTPRequest(requestBuf)
 	fmt.Printf("%s", requestBuf)
 	var response []byte
