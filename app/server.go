@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-const ListenAddress = "0.0.0.0:4221"
+const (
+	ListenAddress = "0.0.0.0:4221"
+)
 
 type HTTPRequest struct {
 	method    string
