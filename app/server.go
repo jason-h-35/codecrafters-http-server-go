@@ -50,14 +50,14 @@ func handleRequest(requestBuf []byte) []byte {
 	request := NewHTTPRequest(requestBuf)
 	fmt.Printf("%s", requestBuf)
 	var response []byte
-	if strings.Compare(request.resource, "/") == 0 {
+	if request.resource == "/" {
 		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 	} else if strings.HasPrefix(request.resource, "/echo/") {
 		body := []byte(request.resource[6:])
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
-	} else if strings.Compare(request.resource, "/user-agent") == 0 {
+	} else if request.resource == "/user-agent" {
 		body := []byte(request.userAgent)
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
