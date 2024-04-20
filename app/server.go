@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -10,6 +11,8 @@ import (
 const (
 	ListenAddress = "0.0.0.0:4221"
 )
+
+var DirFlag *string
 
 type HTTPRequest struct {
 	method    string
@@ -62,10 +65,11 @@ func handleRequest(requestBuf []byte) []byte {
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
-	} else if strings.HasPrefix(request.resource, "/files/") {
+	} else if *DirFlag != "" && strings.HasPrefix(request.resource, "/files") {
 		tokens := strings.Split(request.resource, "/")[2:]
 		subpath := strings.Join(tokens, "/")
-		body := []byte(fileToResponse(subpath))
+		path := *DirFlag + subpath
+		body := []byte(fileToResponse(path))
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
@@ -101,6 +105,8 @@ func handleConnection(conn net.Conn) {
 }
 
 func main() {
+	DirFlag = flag.String("-directory", "", "serve a directory from local filesystem over HTTP")
+	flag.Parse()
 	// listen
 	l, err := net.Listen("tcp", ListenAddress)
 	if err != nil {
