@@ -105,7 +105,7 @@ func handleConnection(conn net.Conn) {
 }
 
 func main() {
-	DirFlag = flag.String("-directory", "", "serve a directory from local filesystem over HTTP")
+	DirFlag = flag.String("directory", "", "serve a directory from local filesystem over HTTP")
 	flag.Parse()
 	// listen
 	l, err := net.Listen("tcp", ListenAddress)
