@@ -66,8 +66,8 @@ func handleRequest(requestBuf []byte) []byte {
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
-	} else if *DirFlag != "" && strings.HasPrefix(request.resource, "/files") {
-		tokens := strings.Split(request.resource, "/")[2:]
+	} else if *DirFlag != "" && strings.HasPrefix(request.resource, "/files/") {
+		tokens := strings.Split(request.resource, "/")[2:] //everything after /files/
 		subpath := strings.Join(tokens, "/")
 		path := *DirFlag + subpath
 		fileContents, err := os.ReadFile(path)
