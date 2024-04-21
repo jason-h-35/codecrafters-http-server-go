@@ -29,13 +29,14 @@ func NewHTTPRequest(buf []byte) HTTPRequest {
 	methodLine := strings.Split(lines[0], " ")
 	var host, userAgent, acceptEnc string
 	for _, l := range lines[1:] {
-		if strings.HasPrefix(l, "Host:") {
+		fmt.Println(l)
+		if strings.HasPrefix(strings.ToLower(l), "host:") {
 			host = strings.Split(l, " ")[1]
 		}
-		if strings.HasPrefix(l, "User-Agent:") {
+		if strings.HasPrefix(strings.ToLower(l), "user-agent:") {
 			userAgent = strings.Split(l, " ")[1]
 		}
-		if strings.HasPrefix(l, "Accept-Encoding:") {
+		if strings.HasPrefix(strings.ToLower(l), "accept-encoding:") {
 			acceptEnc = strings.Split(l, " ")[1]
 		}
 	}
@@ -51,7 +52,8 @@ func NewHTTPRequest(buf []byte) HTTPRequest {
 
 func handleRequest(requestBuf []byte) []byte {
 	request := NewHTTPRequest(requestBuf)
-	fmt.Printf("%s", requestBuf)
+	// fmt.Printf("%s", requestBuf)
+	// fmt.Printf("%s\n\n", request)
 	var response []byte
 	if request.resource == "/" {
 		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
@@ -82,7 +84,7 @@ func handleRequest(requestBuf []byte) []byte {
 func fileToResponse(path string) []byte {
 	dat, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return dat
 }
