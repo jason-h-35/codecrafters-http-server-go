@@ -70,7 +70,11 @@ func handleRequest(requestBuf []byte) []byte {
 		tokens := strings.Split(request.resource, "/")[2:]
 		subpath := strings.Join(tokens, "/")
 		path := *DirFlag + subpath
-		body := []byte(fileToResponse(path))
+		fileContents, err := os.ReadFile(path)
+		if err != nil {
+			return []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+		}
+		body := []byte(fileContents)
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
