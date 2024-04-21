@@ -58,6 +58,7 @@ func handleRequest(requestBuf []byte) []byte {
 		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 	} else if strings.HasPrefix(request.resource, "/echo/") {
 		body := []byte(request.resource[6:])
+		fmt.Println(body)
 		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
 		header := []byte(headerString)
 		response = append(header, body...)
@@ -81,15 +82,7 @@ func handleRequest(requestBuf []byte) []byte {
 	} else {
 		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 	}
-	return response
-}
-
-func fileToResponse(path string) []byte {
-	dat, err := os.ReadFile(path)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return dat
+	return append(response, []byte("\r\n")...)
 }
 
 func handleConnection(conn net.Conn) {
