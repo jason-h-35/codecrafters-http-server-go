@@ -92,6 +92,7 @@ func handleRequest(requestBuf []byte) []byte {
 			if err != nil {
 				fmt.Println("Error writing file: ", err.Error())
 			}
+			response = []byte("HTTP/1.1 201 OK\r\n\r\n")
 		}
 	}
 	return append(response, []byte("\r\n")...)
