@@ -1,6 +1,6 @@
 [![progress-banner](https://backend.codecrafters.io/progress/http-server/a8c1b0cf-fd55-42c1-bd0e-3b898d8b8816)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
-This is a starting point for Go solutions to the
+This is a valid Go solution to the
 ["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
 
 [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
