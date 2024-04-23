@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"net"
 	"os"
 	"strings"
@@ -54,33 +55,45 @@ func handleRequest(requestBuf []byte) []byte {
 	// fmt.Printf("%s", requestBuf)
 	fmt.Printf("%s\n\n", request)
 	var response []byte
-	if request.resource == "/" {
-		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
-	} else if strings.HasPrefix(request.resource, "/echo/") {
-		body := []byte(request.resource[6:])
-		fmt.Println(body)
-		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
-		header := []byte(headerString)
-		response = append(header, body...)
-	} else if request.resource == "/user-agent" {
-		body := []byte(request.userAgent)
-		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
-		header := []byte(headerString)
-		response = append(header, body...)
-	} else if *DirFlag != "" && strings.HasPrefix(request.resource, "/files/") {
-		tokens := strings.Split(request.resource, "/")[2:] //everything after /files/
-		subpath := strings.Join(tokens, "/")
-		path := *DirFlag + subpath
-		fileContents, err := os.ReadFile(path)
-		if err != nil {
-			return []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+	if request.method == "GET" {
+		if request.resource == "/" {
+			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+		} else if strings.HasPrefix(request.resource, "/echo/") {
+			body := []byte(request.resource[6:])
+			fmt.Println(body)
+			headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
+			header := []byte(headerString)
+			response = append(header, body...)
+		} else if request.resource == "/user-agent" {
+			body := []byte(request.userAgent)
+			headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n", len(body))
+			header := []byte(headerString)
+			response = append(header, body...)
+		} else if *DirFlag != "" && strings.HasPrefix(request.resource, "/files/") {
+			tokens := strings.Split(request.resource, "/")[2:] //everything after /files/
+			subpath := strings.Join(tokens, "/")
+			path := *DirFlag + subpath
+			fileContents, err := os.ReadFile(path)
+			if err != nil {
+				return []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+			}
+			body := []byte(fileContents)
+			headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n", len(body))
+			header := []byte(headerString)
+			response = append(header, body...)
+		} else {
+			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 		}
-		body := []byte(fileContents)
-		headerString := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n", len(body))
-		header := []byte(headerString)
-		response = append(header, body...)
-	} else {
-		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+	} else if request.method == "POST" {
+		if strings.HasPrefix(request.resource, "/files/") {
+			tokens := strings.Split(request.resource, "/")[2:]
+			subpath := strings.Join(tokens, "/")
+			path := *DirFlag + subpath
+			err := os.WriteFile(path, []byte(request.resource), 0644)
+			if err != nil {
+				fmt.Println("Error writing file: ", err.Error())
+			}
+		}
 	}
 	return append(response, []byte("\r\n")...)
 }
