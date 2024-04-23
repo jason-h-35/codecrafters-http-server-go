@@ -21,14 +21,16 @@ type HTTPRequest struct {
 	host      string
 	userAgent string
 	acceptEnc string
+	body      string
 }
 
 func NewHTTPRequest(buf []byte) HTTPRequest {
-	s := string(buf)
-	lines := strings.Split(s, "\r\n")
-	methodLine := strings.Split(lines[0], " ")
+	sbuf := string(buf)
+	parts := strings.Split(sbuf, "\r\n\r\n")
+	header := strings.Split(parts[0], "\r\n")
+	methodLine := strings.Split(header[0], " ")
 	var host, userAgent, acceptEnc string
-	for _, l := range lines[1:] {
+	for _, l := range header[1:] {
 		if p := "host:"; strings.HasPrefix(strings.ToLower(l), p) {
 			host = strings.TrimSpace(l[len(p):])
 		}
@@ -39,6 +41,12 @@ func NewHTTPRequest(buf []byte) HTTPRequest {
 			acceptEnc = strings.TrimSpace(l[len(p):])
 		}
 	}
+	var body string
+	if len(parts) > 1 {
+		body = parts[1]
+	} else {
+		body = ""
+	}
 	return HTTPRequest{
 		method:    methodLine[0],
 		resource:  methodLine[1],
@@ -46,6 +54,7 @@ func NewHTTPRequest(buf []byte) HTTPRequest {
 		host:      host,
 		userAgent: userAgent,
 		acceptEnc: acceptEnc,
+		body:      body,
 	}
 }
 
@@ -88,7 +97,7 @@ func handleRequest(requestBuf []byte) []byte {
 			tokens := strings.Split(request.resource, "/")[2:]
 			subpath := strings.Join(tokens, "/")
 			path := *DirFlag + subpath
-			err := os.WriteFile(path, []byte(request.resource), 0644)
+			err := os.WriteFile(path, []byte(request.body), 0644)
 			if err != nil {
 				fmt.Println("Error writing file: ", err.Error())
 			}
